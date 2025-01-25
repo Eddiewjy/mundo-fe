@@ -178,42 +178,72 @@ export const resetTask = async (id: number) => {
   return response.data.data.task;
 };
 
-export const mundo_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo3LCJ1c2VybmFtZSI6IuS5neaAnSIsInJvbGUiOiJhZG1pbiIsImlzcyI6Im11bmRvLWF1dGgtaHViIiwiZXhwIjoxNzM1NDUzNjkwLCJpYXQiOjE3MzQ4NDg4OTB9.53Ng2lGsXYHa0AEAuatsWObFsAGKTHQQQzbnh5jCThQ";//登录以后拿到的token
-
-const api_mundo = axios.create({
-  baseURL:'http://116.198.207.159:12349',
-  
-  params: {
-    "service": "mundo"
-  },
-  headers: {
-    "Authorization": "Bearer " + mundo_token,
-  },
-});
-
-api_mundo.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    console.error('请求失败:', error.response || error.message || error);
-    return Promise.reject(error);
-  }
-);
-
-export  const  getQuestions = async () => {
+//读取常见问题。后端说是url有问题，所以这里单独配置接口
+export const getQuestions = async () => {
     try {
-      const response = await api_mundo.get(`/faq/read`);
+      const response = await axios.get("http://116.198.207.159:12349/faq/read", {
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": "Bearer " + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNSwidXNlcm5hbWUiOiJ5dXVraTMiLCJyb2xlIjoidXNlciIsImlzcyI6Im11bmRvLWF1dGgtaHViIiwiZXhwIjoxNzM3NzAyNDY5LCJpYXQiOjE3MzcwOTc2Njl9.6ZyHG8PVl-SimbaZLda-MgV935l_zcx8UDlYmDbBAP4"
+        }
+      });
       return response.data.data.message.Content;
     } catch (error) {
       alert("问题列表访问失败");
       console.error("Failed to fetch questions", error);
       return [];
+    }
+};
+
+// 创建常见问题
+export const createQuestion = async (question: string, answer: string) => {
+  try {
+    const response = await api.post('/faq/create', {
+      question,
+      answer
+    });
+    return response.data.data;
+  } catch (error) {
+    alert("创建问题失败");
+    console.error("Failed to create question", error);
+    return [];
   }
 };
+
+// 更新常见问题
+export const updateQuestion = async (question: string, newQuestion: string, newAnswer: string) => {
+  try {
+    const response = await api.post('/faq/update', {
+      question,
+      newQuestion,
+      newAnswer
+    });
+    return response.data.data;
+  } catch (error) {
+    alert("更新问题失败");
+    console.error("Failed to update question", error);
+    return [];
+  }
+}
+
+// 删除常见问题
+export const deleteQuestion = async (question: string) => {
+  try {
+    const response = await api.delete('/faq/delete', {
+      params: { question }
+    });
+    return response.data.data;
+  } catch (error) {
+    alert("删除问题失败");
+    console.error("Failed to delete question", error);
+    return [];
+  }
+}
   
 
   export const deleteChatHistory = async () => {
     try {
-      const response = await api_mundo.delete(`/api/ws/delete`, {
+      const response = await api.delete(`/api/ws/delete`, {
         params: { toUid: 2 }
       });
       return response.data.message;
@@ -222,4 +252,5 @@ export  const  getQuestions = async () => {
       console.error("Failed to delete history", error);
       return [];
     }
-  };
+};
+
